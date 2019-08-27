@@ -27,4 +27,4 @@ database.rules.json
 .firebase/
 
 # Local data
-src/lib/msf-mapswipe-users-export.jsongi
+src/lib/msf-mapswipe-users-export.json
