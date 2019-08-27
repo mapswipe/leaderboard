@@ -3,8 +3,13 @@ const firebase = require('firebase');
 const config = require('./config');
 const localData = require('./msf-mapswipe-users-export.json');
 
+// If eq 'dev' fetch data locally else (eq 'prod') fetch data from Firebase
+const SOURCE = 'prod';
+
 firebase.initializeApp(config);
-const db = firebase.firestore();
+const db = firebase.database();
+
+const isInclude = (str, pattern) => str.toLowerCase().includes(pattern.toLowerCase());
 
 export const getLocalData = (query = undefined) => {
   const companies = [
@@ -26,7 +31,7 @@ export const getLocalData = (query = undefined) => {
     const { contributions, distance, username } = localData[key];
     const company = companies[Math.floor(Math.random() * companies.length)];
     const formattedUsername = `${company}_${username}`;
-    if (!query || formattedUsername.toLowerCase().includes(query.toLowerCase())) {
+    if (!query || isInclude(formattedUsername, query)) {
       data.push({
         contributions,
         distance,
@@ -40,14 +45,14 @@ export const getLocalData = (query = undefined) => {
 };
 
 /**
- * @return Promise of all Users data
- * @param state string. If eq 'dev' fetch data localy else eq 'prod' fetch data from Firebase
+ * @return Promise of all Users data where User username match with query
+ * @param query string
  */
-export const getUsersPromise = (state = 'prod') => {
+export const getUsersPromise = (query = '') => {
   // local data
-  if (state === 'dev') {
+  if (SOURCE === 'dev') {
     return new Promise((resolve, reject) => {
-      const res = getLocalData();
+      const res = getLocalData(query);
       if (res) resolve(res); else reject(Error('Something goes wrong'));
     });
   }
@@ -55,16 +60,18 @@ export const getUsersPromise = (state = 'prod') => {
   // prod data
   let totalContributions = 0;
   let totalDistance = 0;
-  const usersRef = db.collection('users');
-  return usersRef.get()
+  const usersRef = db.ref('users');
+  return usersRef.once('value')
     .then((snapshot) => {
       const data = [];
-      snapshot.forEach((doc) => {
-        const docData = doc.data();
-        const { contributions, distance } = docData;
-        data.push(docData);
-        totalContributions += contributions;
-        totalDistance += distance;
+      snapshot.forEach((childSnapshot) => {
+        const docData = childSnapshot.val();
+        const { contributions, distance, username } = docData;
+        if (!query || isInclude(username, query)) {
+          data.push(docData);
+          totalContributions += contributions;
+          totalDistance += distance;
+        }
       });
       return { data, totalContributions, totalDistance };
     })
@@ -73,23 +80,4 @@ export const getUsersPromise = (state = 'prod') => {
       console.log('Error getting documents', err);
       return null;
     });
-};
-
-/**
- * @return Promise of all Users data where User username match with query
- * @param query string
- * @param state string. If eq 'dev' fetch data localy else eq 'prod' fetch data from Firebase
- */
-export const getUsersByQueryPromise = (query, state = 'prod') => {
-  // local data
-  if (state === 'dev') {
-    return new Promise((resolve, reject) => {
-      const res = getLocalData(query);
-      if (res) resolve(res); else reject(Error('Something goes wrong'));
-    });
-  }
-
-  // prod data
-  // TODO
-  return new Promise();
 };

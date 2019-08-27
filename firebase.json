@@ -1,14 +1,9 @@
 {
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
+  "database": {
+    "rules": "database.rules.json"
   },
   "hosting": {
-    "public": "public",
-    "headers": [{
-       "source": "/service-worker.js",
-       "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
-     }],
+    "public": "build",
     "ignore": [
       "firebase.json",
       "**/.*",
