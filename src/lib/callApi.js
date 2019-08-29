@@ -1,7 +1,13 @@
-require('firebase/firestore');
-const firebase = require('firebase');
+import firebase from 'firebase';
+
 const config = require('./config');
-const localData = require('./msf-mapswipe-users-export.json');
+
+let localData = [];
+try {
+  // eslint-disable-next-line global-require
+  localData = require('./msf-mapswipe-users-export.json');
+  // eslint-disable-next-line no-console
+} catch (e) { console.error(e); }
 
 // If eq 'dev' fetch data locally else (eq 'prod') fetch data from Firebase
 const SOURCE = 'prod';
@@ -27,9 +33,9 @@ export const getLocalData = (query = undefined) => {
   const data = [];
   let totalContributions = 0;
   let totalDistance = 0;
-  Object.keys(localData).forEach((key) => {
+  Object.keys(localData).forEach((key, index) => {
     const { contributions, distance, username } = localData[key];
-    const company = companies[Math.floor(Math.random() * companies.length)];
+    const company = companies[Math.floor(index % companies.length)];
     const formattedUsername = `${company}_${username}`;
     if (!query || isInclude(formattedUsername, query)) {
       data.push({
