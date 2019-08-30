@@ -51,7 +51,7 @@ const TableHeader = ({ name, accessor, description, sortFunction, setSortedHeade
         {name}
         {description && <NameDescription>{description}</NameDescription>}
       </Name>
-      {<Arrow id={`${accessor}SortArrow`} isUp={!desc} className="sort-arrows">&#9650;</Arrow>}
+      {<Arrow id={`${accessor}SortArrow`} isUp={!desc} className="sort-arrows">&#9660;</Arrow>}
     </Container>
   );
 };

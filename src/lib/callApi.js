@@ -1,4 +1,5 @@
 import firebase from 'firebase';
+import { getLevelForContributionCount } from './Levels';
 
 const config = require('./config');
 
@@ -34,14 +35,18 @@ export const getLocalData = (query = undefined) => {
   let totalContributions = 0;
   let totalDistance = 0;
   Object.keys(localData).forEach((key, index) => {
-    const { contributions, distance, username } = localData[key];
+    const { contributions, distance } = localData[key];
+    let { username } = localData[key];
+    username = username.trim();
     const company = companies[Math.floor(index % companies.length)];
     const formattedUsername = `${company}_${username}`;
+    const level = getLevelForContributionCount(distance);
     if (!query || isInclude(formattedUsername, query)) {
       data.push({
         contributions,
         distance,
         username: formattedUsername,
+        level,
       });
       totalContributions += contributions;
       totalDistance += distance;
@@ -72,9 +77,12 @@ export const getUsersPromise = (query = '') => {
       const data = [];
       snapshot.forEach((childSnapshot) => {
         const docData = childSnapshot.val();
-        const { contributions, distance, username } = docData;
+        const { contributions, distance } = docData;
+        let { username } = docData;
+        username = username.trim();
+        const level = getLevelForContributionCount(distance);
         if (!query || isInclude(username, query)) {
-          data.push(docData);
+          data.push({ ...docData, username, level });
           totalContributions += contributions;
           totalDistance += distance;
         }
