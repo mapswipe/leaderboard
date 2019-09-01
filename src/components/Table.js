@@ -8,7 +8,6 @@ import TableHeader from './TableHeader';
 import LoadingComponent from './LoadingComponent';
 import { ColoredSpan, Icon, mobileThresholdsPixels } from './styledComponents';
 import { formattedNumber } from '../lib/formatting';
-import icon from '../assets/logo.mapSwipe.png';
 
 const StyledDataTable = styled(DataTable)`&&&{
   .rdt_TableCell, .rdt_TableCol {
@@ -88,7 +87,7 @@ const styledDistanceCell = row => (
 const styledBagdeCell = row => (<IndexSpan color="blue">{`${row.index}.`}</IndexSpan>);
 const styledUsernameCell = row => (
   <UsernameCell>
-    <Icon src={icon} alt={row.username} />
+    <Icon src={row.logo} alt={row.username} />
     <ColoredSpan color="blue">{row.username}</ColoredSpan>
   </UsernameCell>
 );

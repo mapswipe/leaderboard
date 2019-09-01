@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { ColoredSpan, colors } from './styledComponents';
 
-
 const StyledSpinner = styled.svg`
   animation: rotate 2s linear infinite;
   margin: 0px 0 -6px 16px;

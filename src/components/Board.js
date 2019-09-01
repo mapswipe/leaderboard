@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { CSVLink } from 'react-csv';
 
 import Table from './Table';
+import SearchBar from './SearchBar';
 import { colors, mobileThresholdsPixels } from './styledComponents';
 import { getUsersPromise } from '../lib/callApi';
 import { formattedNumber, formattedDate } from '../lib/formatting';
@@ -34,9 +35,6 @@ const P = styled.p`
 
 const EmphSpan1 = styled.span`color: ${colors.orange};`;
 const EmphSpan2 = styled.span`color: ${colors.lightOrange}`;
-const FormContainer = styled.div``;
-const Input = styled.input``;
-const SubmitButton = styled.button``;
 const StyledCSVLink = styled(CSVLink)`
   margin-left: 10px;
   color: ${colors.grey};
@@ -51,7 +49,14 @@ const csvHeaders = [
 class Board extends React.Component {
   constructor() {
     super();
-    this.state = { totalData: [], totalContributions: 0, totalDistance: 0, query: '', isLoading: true };
+    this.state = {
+      totalData: [],
+      totalContributions: 0,
+      totalDistance: 0,
+      query: '',
+      isSearcAtStart: false,
+      isLoading: true,
+    };
     getUsersPromise().then(({ data, totalContributions, totalDistance }) => this.setState({
       totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
       totalContributions,
@@ -71,10 +76,15 @@ class Board extends React.Component {
     }
   }
 
+  toggleIsSearcAtStart() {
+    const { isSearcAtStart } = this.state;
+    this.setState({ isSearcAtStart: !isSearcAtStart });
+  }
+
   runSearch() {
-    const { query } = this.state;
+    const { query, isSearcAtStart } = this.state;
     this.setState({ totalData: [], isLoading: true });
-    getUsersPromise(query).then(({ data, totalContributions, totalDistance }) => this.setState({
+    getUsersPromise(query, isSearcAtStart).then(({ data, totalContributions, totalDistance }) => this.setState({
       totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
       totalContributions,
       totalDistance,
@@ -89,14 +99,17 @@ class Board extends React.Component {
   }
 
   render() {
-    const { totalData, totalContributions, totalDistance, isLoading } = this.state;
+    const { totalData, totalContributions, totalDistance, isLoading, isSearcAtStart } = this.state;
     return (
       <MainContainer>
         <a href="/"><Img src={logo} alt="MapSwipe logo" /></a>
-        <FormContainer>
-          <Input type="text" onBlur={(e) => { this.handleOnBlur(e); }} onKeyUp={(e) => { this.handleKeyUp(e); }} />
-          <SubmitButton onClick={() => { this.runSearch(); }}>Search</SubmitButton>
-        </FormContainer>
+        <SearchBar
+          handleOnBlur={(e) => { this.handleOnBlur(e); }}
+          handleKeyUp={(e) => { this.handleKeyUp(e); }}
+          isSearcAtStart={isSearcAtStart}
+          toggleIsSearcAtStart={() => { this.toggleIsSearcAtStart(); }}
+          runSearch={() => { this.runSearch(); }}
+        />
         <P>
           Thanks for mapping &nbsp;
           <EmphSpan1>{formattedNumber(totalContributions)}</EmphSpan1>
