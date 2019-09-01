@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 import TableHeader from './TableHeader';
 import LoadingComponent from './LoadingComponent';
-import { ColoredSpan, Icon } from './styledComponents';
+import { ColoredSpan, Icon, mobileThresholdsPixels } from './styledComponents';
 import { formattedNumber } from '../lib/formatting';
 import icon from '../assets/logo.mapSwipe.png';
 
@@ -22,6 +22,13 @@ const StyledDataTable = styled(DataTable)`&&&{
     padding-left: 12px;
   }
   .sort-arrows { opacity: 0; }
+  .rdt_TableFooter {
+    @media(max-width: ${mobileThresholdsPixels}) {
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+    }
+  }
   ${({ activeHeader }) => `
     #usernameSortArrow { opacity: ${(activeHeader === 'username') ? 1 : 0} }
     #contributionsSortArrow { opacity: ${(activeHeader === 'contributions') ? 1 : 0} }
@@ -34,19 +41,25 @@ const UsernameCell = styled.div`
   align-items: center;
   width: 100%;
   padding-left: 25%;
+  @media(max-width: ${mobileThresholdsPixels}) {
+    padding-left: 0px;
+  }
 `;
 
 const BagdeCell = styled.div`
+  align-items: center;
   width: 100%;
   display: flex;
   justify-content: space-evenly;
-}
 `;
 
 const IndexSpan = styled(ColoredSpan)`
   min-width: 42px;
   font-size: 13px;
   text-align: center;
+  @media(max-width: ${mobileThresholdsPixels}) {
+
+  }
 `;
 
 const ContributionsSpan = styled(ColoredSpan)`margin-left: -20px;`;
@@ -55,6 +68,10 @@ const DistanceSpan = styled(ColoredSpan)`
   margin-right: -10%;
   min-width: 75px
   text-align: right;
+  @media(max-width: ${mobileThresholdsPixels}) {
+    margin-right: 6px;
+    min-width: 60px
+  }
 `;
 
 const styledContributionsCell = row => (
