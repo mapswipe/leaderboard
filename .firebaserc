@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "msf-mapswipe"
+  },
+  "targets": {
+    "msf-mapswipe": {
+      "hosting": {
+        "leaderboard": [
+          "mapswipe-leaderboard"
+        ]
+      }
+    }
   }
 }
