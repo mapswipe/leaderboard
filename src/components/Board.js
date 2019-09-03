@@ -41,9 +41,10 @@ const StyledCSVLink = styled(CSVLink)`
 `;
 
 const csvHeaders = [
+  { label: 'Username', key: 'username' },
   { label: 'Mapped Area', key: 'distance' },
   { label: 'Contributions', key: 'contributions' },
-  { label: 'Username', key: 'username' },
+  { label: 'Level', key: 'level.grade' },
 ];
 
 class Board extends React.Component {
@@ -54,7 +55,7 @@ class Board extends React.Component {
       totalContributions: 0,
       totalDistance: 0,
       query: '',
-      isSearcAtStart: false,
+      isSearcAtStart: true,
       isLoading: true,
     };
     getUsersPromise().then(({ data, totalContributions, totalDistance }) => this.setState({

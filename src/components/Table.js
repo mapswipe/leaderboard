@@ -5,6 +5,7 @@ import DataTable from 'react-data-table-component';
 import styled from 'styled-components';
 
 import TableHeader from './TableHeader';
+import Tooltip from './Tooltip';
 import LoadingComponent from './LoadingComponent';
 import { ColoredSpan, Icon, mobileThresholdsPixels } from './styledComponents';
 import { formattedNumber } from '../lib/formatting';
@@ -39,33 +40,37 @@ const UsernameCell = styled.div`
   display: flex;
   align-items: center;
   width: 100%;
-  padding-left: 25%;
+  padding-left: 5%;
   @media(max-width: ${mobileThresholdsPixels}) {
     padding-left: 0px;
   }
 `;
 
 const BagdeCell = styled.div`
-  align-items: center;
   width: 100%;
   display: flex;
   justify-content: space-evenly;
+  align-items: center;
+  overflow: visible !important;
 `;
 
 const IndexSpan = styled(ColoredSpan)`
   min-width: 42px;
   font-size: 13px;
-  text-align: center;
-  @media(max-width: ${mobileThresholdsPixels}) {
-
-  }
 `;
 
 const ContributionsSpan = styled(ColoredSpan)`margin-left: -20px;`;
 const DistanceSpan = styled(ColoredSpan)`
-  margin-left: 10px;
-  margin-right: -10%;
   min-width: 75px
+  text-align: center;
+  @media(max-width: ${mobileThresholdsPixels}) {
+    margin-right: 6px;
+    min-width: 60px
+  }
+`;
+
+const LevelSpan = styled(ColoredSpan)`
+  margin-right: -20px;
   text-align: right;
   @media(max-width: ${mobileThresholdsPixels}) {
     margin-right: 6px;
@@ -73,23 +78,29 @@ const DistanceSpan = styled(ColoredSpan)`
   }
 `;
 
-const styledContributionsCell = row => (
-  <ContributionsSpan color="orange">{formattedNumber(row.contributions)}</ContributionsSpan>
-);
-
-const styledDistanceCell = row => (
-  <BagdeCell>
-    <DistanceSpan color="darkGrey">{formattedNumber(row.distance)}</DistanceSpan>
-    <Icon src={row.level.badge} alt={row.level.title} />
-  </BagdeCell>
-);
-
-const styledBagdeCell = row => (<IndexSpan color="blue">{`${row.index}.`}</IndexSpan>);
+const styledIndexCell = row => (<IndexSpan color="blue">{`${row.index}.`}</IndexSpan>);
 const styledUsernameCell = row => (
   <UsernameCell>
     <Icon src={row.logo} alt={row.username} />
     <ColoredSpan color="blue">{row.username}</ColoredSpan>
   </UsernameCell>
+);
+
+const styledDistanceCell = row => (<DistanceSpan color="darkGrey">{formattedNumber(row.distance)}</DistanceSpan>);
+
+const styledLevelCell = row => (
+  <BagdeCell>
+    {/* to avoid react-data-table force css injection on the first Children */}
+    <div />
+    <Tooltip text={row.level.title}>
+      <LevelSpan color="darkGrey">{row.level.grade}</LevelSpan>
+    </Tooltip>
+    <Icon src={row.level.badge} alt={row.level.title} />
+  </BagdeCell>
+);
+
+const styledContributionsCell = row => (
+  <ContributionsSpan color="orange">{formattedNumber(row.contributions)}</ContributionsSpan>
 );
 
 
@@ -108,7 +119,7 @@ class Table extends React.Component {
     const { sortFunction } = props;
     this.state = { page: 1, perPage: 10, sortedHeader: 'distance' };
     this.columns = [
-      { cell: styledBagdeCell },
+      { cell: styledIndexCell },
       {
         name: (
           <TableHeader
@@ -133,6 +144,10 @@ class Table extends React.Component {
         ),
         selector: 'distance',
         cell: styledDistanceCell,
+      },
+      {
+        name: (<TableHeader name="Level" noSortable />),
+        cell: styledLevelCell,
       },
       {
         name: (

@@ -26,6 +26,7 @@
     "start": "REACT_APP_SOURCE=dev react-scripts start",
     "start:prod": "REACT_APP_SOURCE=prod react-scripts start",
     "build": "REACT_APP_SOURCE=prod react-scripts build",
+    "deploy": "yarn build && firebase deploy",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

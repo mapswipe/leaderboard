@@ -9,7 +9,7 @@ const Container = styled.div`
   align-items: center;
   width: 100%;
   height: 100%;
-  cursor: pointer;
+  cursor: ${({ noSortable }) => noSortable ? 'default' : 'pointer'};
 `;
 
 const Name = styled.div`
@@ -36,7 +36,7 @@ const Arrow = styled.span`
   ${({ isUp }) => isUp && 'transform: rotate(-180deg);'}
 `;
 
-const TableHeader = ({ name, accessor, description, sortFunction, setSortedHeader }) => {
+const TableHeader = ({ name, accessor, description, sortFunction, setSortedHeader, noSortable }) => {
   const [desc, setDesc] = useState(accessor === 'distance');
 
   function handleClick() {
@@ -46,22 +46,23 @@ const TableHeader = ({ name, accessor, description, sortFunction, setSortedHeade
   }
 
   return (
-    <Container onClick={() => handleClick()}>
+    <Container onClick={() => !noSortable && handleClick()} noSortable={noSortable}>
       <Name>
         {name}
         {description && <NameDescription>{description}</NameDescription>}
       </Name>
-      {<Arrow id={`${accessor}SortArrow`} isUp={!desc} className="sort-arrows">&#9660;</Arrow>}
+      {!noSortable && <Arrow id={`${accessor}SortArrow`} isUp={!desc} className="sort-arrows">&#9660;</Arrow>}
     </Container>
   );
 };
 
 TableHeader.propTypes = {
   name: PropTypes.string.isRequired,
-  accessor: PropTypes.string.isRequired,
+  accessor: PropTypes.string,
   description: PropTypes.string,
-  sortFunction: PropTypes.func.isRequired,
-  setSortedHeader: PropTypes.func.isRequired,
+  sortFunction: PropTypes.func,
+  setSortedHeader: PropTypes.func,
+  noSortable: PropTypes.bool,
 };
 
 export default TableHeader;
