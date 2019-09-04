@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { CSVLink } from 'react-csv';
 
 import Table from './Table';
-import { colors } from './styledComponents';
+import { colors, mobileThresholdsPixels } from './styledComponents';
 import { getUsersPromise } from '../lib/callApi';
 import { formattedNumber, formattedDate } from '../lib/formatting';
 import { basicSort } from '../lib/sortFunctions';
@@ -11,7 +11,7 @@ import logo from '../assets/logo.mapSwipe.banner.png';
 
 const MainContainer = styled.div`
   padding: 48px 15vw;
-  @media(max-width: 600px) {
+  @media(max-width: ${mobileThresholdsPixels}) {
     width: 100%;
     padding: 32px 10px;
   }
@@ -19,7 +19,7 @@ const MainContainer = styled.div`
 
 const Img = styled.img`
   width: 450px;
-  @media(max-width: 600px) {
+  @media(max-width: ${mobileThresholdsPixels}) {
     width: 250px;
   }
 `;
@@ -27,7 +27,7 @@ const Img = styled.img`
 const P = styled.p`
   color: ${colors.grey};
   width: 100%;
-  @media(max-width: 600px) {
+  @media(max-width: ${mobileThresholdsPixels}) {
     font-size: 12px;
   }
 `;
@@ -92,7 +92,7 @@ class Board extends React.Component {
     const { totalData, totalContributions, totalDistance, isLoading } = this.state;
     return (
       <MainContainer>
-        <Img src={logo} alt="MapSwipe logo" />
+        <a href="/"><Img src={logo} alt="MapSwipe logo" /></a>
         <FormContainer>
           <Input type="text" onBlur={(e) => { this.handleOnBlur(e); }} onKeyUp={(e) => { this.handleKeyUp(e); }} />
           <SubmitButton onClick={() => { this.runSearch(); }}>Search</SubmitButton>
