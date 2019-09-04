@@ -55,7 +55,7 @@ class Board extends React.Component {
       totalContributions: 0,
       totalDistance: 0,
       query: '',
-      isSearcAtStart: true,
+      startsWithSearch: true,
       isLoading: true,
     };
     getUsersPromise().then(({ data, totalContributions, totalDistance }) => this.setState({
@@ -77,15 +77,15 @@ class Board extends React.Component {
     }
   }
 
-  toggleIsSearcAtStart() {
-    const { isSearcAtStart } = this.state;
-    this.setState({ isSearcAtStart: !isSearcAtStart });
+  toggleStartsWithSearch() {
+    const { startsWithSearch } = this.state;
+    this.setState({ startsWithSearch: !startsWithSearch });
   }
 
   runSearch() {
-    const { query, isSearcAtStart } = this.state;
+    const { query, startsWithSearch } = this.state;
     this.setState({ totalData: [], isLoading: true });
-    getUsersPromise(query, isSearcAtStart).then(({ data, totalContributions, totalDistance }) => this.setState({
+    getUsersPromise(query, startsWithSearch).then(({ data, totalContributions, totalDistance }) => this.setState({
       totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
       totalContributions,
       totalDistance,
@@ -100,15 +100,15 @@ class Board extends React.Component {
   }
 
   render() {
-    const { totalData, totalContributions, totalDistance, isLoading, isSearcAtStart } = this.state;
+    const { totalData, totalContributions, totalDistance, isLoading, startsWithSearch } = this.state;
     return (
       <MainContainer>
         <a href="/"><Img src={logo} alt="MapSwipe logo" /></a>
         <SearchBar
           handleOnBlur={(e) => { this.handleOnBlur(e); }}
           handleKeyUp={(e) => { this.handleKeyUp(e); }}
-          isSearcAtStart={isSearcAtStart}
-          toggleIsSearcAtStart={() => { this.toggleIsSearcAtStart(); }}
+          startsWithSearch={startsWithSearch}
+          toggleStartsWithSearch={() => { this.toggleStartsWithSearch(); }}
           runSearch={() => { this.runSearch(); }}
         />
         <P>

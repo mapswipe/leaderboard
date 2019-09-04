@@ -26,30 +26,30 @@ const SubmitButton = styled.button`
   margin-left: 16px;
 `;
 
-const SearchBar = ({ handleOnBlur, handleKeyUp, isSearcAtStart, toggleIsSearcAtStart, runSearch }) => (
+const SearchBar = ({ handleOnBlur, handleKeyUp, startsWithSearch, toggleStartsWithSearch, runSearch }) => (
   <FormContainer>
     <SubContainer>
       <LabelsContainer>
         <Label>
-          <Checkbox checked={isSearcAtStart} onChange={toggleIsSearcAtStart} />
+          <Checkbox checked={startsWithSearch} onChange={toggleStartsWithSearch} />
           starts with
         </Label>
         <Label>
-          <Checkbox checked={!isSearcAtStart} onChange={toggleIsSearcAtStart} />
+          <Checkbox checked={!startsWithSearch} onChange={toggleStartsWithSearch} />
           includes
         </Label>
       </LabelsContainer>
-      <Input onBlur={(e) => { handleOnBlur(e); }} onKeyUp={(e) => { handleKeyUp(e); }} />
+      <Input onBlur={handleOnBlur} onKeyUp={handleKeyUp} />
     </SubContainer>
-    <SubmitButton onClick={() => { runSearch(); }}>Search</SubmitButton>
+    <SubmitButton onClick={runSearch}>Search</SubmitButton>
   </FormContainer>
 );
 
 SearchBar.propTypes = {
   handleOnBlur: PropTypes.func.isRequired,
   handleKeyUp: PropTypes.func.isRequired,
-  isSearcAtStart: PropTypes.bool.isRequired,
-  toggleIsSearcAtStart: PropTypes.func.isRequired,
+  startsWithSearch: PropTypes.bool.isRequired,
+  toggleStartsWithSearch: PropTypes.func.isRequired,
   runSearch: PropTypes.func.isRequired,
 };
 

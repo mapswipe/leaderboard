@@ -6,7 +6,6 @@ const logoMapSwipe = require('../assets/companies/mapSwipe.png');
 const config = require('./config');
 
 let localData = [];
-/* eslint-disable global-require */
 try {
   // eslint-disable-next-line global-require
   localData = require('./msf-mapswipe-users-export.json').data;
@@ -15,9 +14,9 @@ try {
 
 firebase.initializeApp(config);
 const db = firebase.database();
-const companies = ['apple', 'uber', 'slack', 'github', 'lyft', 'twitter', 'amazon', 'google', 'ibm', 'sap'];
+const companies = ['apple', 'uber', 'slack', 'github', 'sf', 'twitter', 'amazon', 'google', 'ibm', 'sap'];
 
-const isInclude = (str, pattern, isSearcAtStart) => isSearcAtStart
+const matchesSearch = (str, pattern, isSearcAtStart) => isSearcAtStart
   ? str.toLowerCase().startsWith(pattern.toLowerCase())
   : str.toLowerCase().includes(pattern.toLowerCase());
 
@@ -27,6 +26,7 @@ const getCompanyLogo = (username) => {
     default: return logoMapSwipe;
   }
 };
+
 const getFormattedData = (snapshot, query = undefined, isSearcAtStart) => {
   const data = [];
   let totalContributions = 0;
@@ -43,7 +43,7 @@ const getFormattedData = (snapshot, query = undefined, isSearcAtStart) => {
     const { contributions, distance } = datum;
     const level = getLevelForContributionCount(distance);
     const logo = getCompanyLogo(username);
-    if (!query || isInclude(username, query, isSearcAtStart)) {
+    if (!query || matchesSearch(username, query, isSearcAtStart)) {
       data.push({ contributions, distance, username, logo, level });
       totalContributions += contributions;
       totalDistance += distance;
