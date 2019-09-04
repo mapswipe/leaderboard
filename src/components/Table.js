@@ -36,26 +36,39 @@ const UsernameCell = styled.div`
   padding-left: 25%;
 `;
 
-const IndexSpan = styled.span`
+const BagdeCell = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
+`;
+
+const IndexSpan = styled(ColoredSpan)`
   min-width: 42px;
-  margin-right: 6%;
   font-size: 13px;
   text-align: center;
 `;
 
-const StyledColoredSpan = styled(ColoredSpan)`margin-left: -20px`;
+const ContributionsSpan = styled(ColoredSpan)`margin-left: -20px;`;
+const DistanceSpan = styled(ColoredSpan)`
+  margin-left: 10px;
+  margin-right: -10%;
+  min-width: 75px
+  text-align: right;
+`;
 
 const styledContributionsCell = row => (
-  <StyledColoredSpan color="orange">{formattedNumber(row.contributions)}</StyledColoredSpan>
+  <ContributionsSpan color="orange">{formattedNumber(row.contributions)}</ContributionsSpan>
 );
 
 const styledDistanceCell = row => (
-  <StyledColoredSpan color="darkGrey">{formattedNumber(row.distance)}</StyledColoredSpan>
+  <BagdeCell>
+    <DistanceSpan color="darkGrey">{formattedNumber(row.distance)}</DistanceSpan>
+    <Icon src={row.level.badge} alt={row.level.title} />
+  </BagdeCell>
 );
 
-const styledIndexCell = row => (
-  <ColoredSpan color="blue">{<IndexSpan>{`${row.index}.`}</IndexSpan>}</ColoredSpan>
-);
+const styledBagdeCell = row => (<IndexSpan color="blue">{`${row.index}.`}</IndexSpan>);
 const styledUsernameCell = row => (
   <UsernameCell>
     <Icon src={icon} alt={row.username} />
@@ -79,7 +92,19 @@ class Table extends React.Component {
     const { sortFunction } = props;
     this.state = { page: 1, perPage: 10, sortedHeader: 'distance' };
     this.columns = [
-      { cell: styledIndexCell },
+      { cell: styledBagdeCell },
+      {
+        name: (
+          <TableHeader
+            accessor="username"
+            name="Username"
+            sortFunction={desc => sortFunction('username', desc)}
+            setSortedHeader={(name) => { this.setState({ sortedHeader: name }); }}
+          />
+        ),
+        selector: 'username',
+        cell: styledUsernameCell,
+      },
       {
         name: (
           <TableHeader
@@ -105,18 +130,6 @@ class Table extends React.Component {
         ),
         selector: 'contributions',
         cell: styledContributionsCell,
-      },
-      {
-        name: (
-          <TableHeader
-            accessor="username"
-            name="Username"
-            sortFunction={desc => sortFunction('username', desc)}
-            setSortedHeader={(name) => { this.setState({ sortedHeader: name }); }}
-          />
-        ),
-        selector: 'username',
-        cell: styledUsernameCell,
       },
     ];
   }
