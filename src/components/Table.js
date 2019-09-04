@@ -146,7 +146,7 @@ class Table extends React.Component {
         cell: styledDistanceCell,
       },
       {
-        name: (<TableHeader name="Level" noSortable />),
+        name: (<TableHeader name="Level" notSortable />),
         cell: styledLevelCell,
       },
       {
@@ -163,6 +163,8 @@ class Table extends React.Component {
         cell: styledContributionsCell,
       },
     ];
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handlePerRowsChange = this.handlePerRowsChange.bind(this);
   }
 
   handlePageChange(page) {
@@ -188,8 +190,8 @@ class Table extends React.Component {
         noHeader
         paginationServer
         paginationTotalRows={totalRows}
-        onChangeRowsPerPage={(perPage, page) => { this.handlePerRowsChange(perPage, page); }}
-        onChangePage={(page) => { this.handlePageChange(page); }}
+        onChangeRowsPerPage={this.handlePerRowsChange}
+        onChangePage={this.handlePageChange}
         noDataComponent={isLoading ? <LoadingComponent /> : 'No data available'}
       />
     );

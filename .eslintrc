@@ -53,7 +53,6 @@
     "jsx-a11y/no-static-element-interactions": 0,
     "import/prefer-default-export": 0,
     "object-curly-newline": ["error", {"ObjectPattern": { "multiline": true }}],
-    "react/require-default-props": [0],
-    "jsx-a11y/label-has-for": [ 2, { "required": {"every": [ "id" ]} } ]
+    "react/require-default-props": [0]
   }
 }

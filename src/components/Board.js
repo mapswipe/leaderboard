@@ -64,6 +64,11 @@ class Board extends React.Component {
       totalDistance,
       isLoading: false,
     }));
+    this.handleOnBlur = this.handleOnBlur.bind(this);
+    this.handleKeyUp = this.handleKeyUp.bind(this);
+    this.toggleStartsWithSearch = this.toggleStartsWithSearch.bind(this);
+    this.runSearch = this.runSearch.bind(this);
+    this.sortFunction = this.sortFunction.bind(this);
   }
 
   handleOnBlur(event) {
@@ -73,7 +78,7 @@ class Board extends React.Component {
   handleKeyUp(event) {
     if (event.keyCode === 13) {
       event.preventDefault();
-      this.setState({ query: event.target.value }, () => { this.runSearch(); });
+      this.setState({ query: event.target.value }, this.runSearch);
     }
   }
 
@@ -105,11 +110,11 @@ class Board extends React.Component {
       <MainContainer>
         <a href="/"><Img src={logo} alt="MapSwipe logo" /></a>
         <SearchBar
-          handleOnBlur={(e) => { this.handleOnBlur(e); }}
-          handleKeyUp={(e) => { this.handleKeyUp(e); }}
+          handleOnBlur={this.handleOnBlur}
+          handleKeyUp={this.handleKeyUp}
           startsWithSearch={startsWithSearch}
-          toggleStartsWithSearch={() => { this.toggleStartsWithSearch(); }}
-          runSearch={() => { this.runSearch(); }}
+          toggleStartsWithSearch={this.toggleStartsWithSearch}
+          runSearch={this.runSearch}
         />
         <P>
           Thanks for mapping &nbsp;
@@ -120,7 +125,7 @@ class Board extends React.Component {
         </P>
         <Table
           totalData={totalData}
-          sortFunction={(accessor, desc) => this.sortFunction(accessor, desc)}
+          sortFunction={this.sortFunction}
           isLoading={isLoading}
         />
         <StyledCSVLink
