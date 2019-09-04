@@ -23,8 +23,9 @@
     "prettier": "^1.18.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "REACT_APP_SOURCE=dev react-scripts start",
+    "start:prod": "REACT_APP_SOURCE=prod react-scripts start",
+    "build": "REACT_APP_SOURCE=prod react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
