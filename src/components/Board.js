@@ -64,30 +64,25 @@ class Board extends React.Component {
       totalDistance,
       isLoading: false,
     }));
-    this.handleOnBlur = this.handleOnBlur.bind(this);
-    this.handleKeyUp = this.handleKeyUp.bind(this);
-    this.toggleStartsWithSearch = this.toggleStartsWithSearch.bind(this);
-    this.runSearch = this.runSearch.bind(this);
-    this.sortFunction = this.sortFunction.bind(this);
   }
 
-  handleOnBlur(event) {
+  handleOnBlur = (event) => {
     this.setState({ query: event.target.value });
   }
 
-  handleKeyUp(event) {
+  handleKeyUp = (event) => {
     if (event.keyCode === 13) {
       event.preventDefault();
       this.setState({ query: event.target.value }, this.runSearch);
     }
   }
 
-  toggleStartsWithSearch() {
+  toggleStartsWithSearch = () => {
     const { startsWithSearch } = this.state;
     this.setState({ startsWithSearch: !startsWithSearch });
   }
 
-  runSearch() {
+  runSearch = () => {
     const { query, startsWithSearch } = this.state;
     this.setState({ totalData: [], isLoading: true });
     getUsersPromise(query, startsWithSearch).then(({ data, totalContributions, totalDistance }) => this.setState({
@@ -98,7 +93,7 @@ class Board extends React.Component {
     }));
   }
 
-  sortFunction(accessor, desc = true) {
+  sortFunction = (accessor, desc = true) => {
     const { totalData } = this.state;
     const data = [...totalData.sort((a, b) => basicSort(a, b, accessor, desc))];
     this.setState({ totalData: data });

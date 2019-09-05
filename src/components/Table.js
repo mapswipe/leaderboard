@@ -163,15 +163,13 @@ class Table extends React.Component {
         cell: styledContributionsCell,
       },
     ];
-    this.handlePageChange = this.handlePageChange.bind(this);
-    this.handlePerRowsChange = this.handlePerRowsChange.bind(this);
   }
 
-  handlePageChange(page) {
+  handlePageChange = (page) => {
     this.setState({ page });
   }
 
-  handlePerRowsChange(perPage, page) {
+  handlePerRowsChange = (perPage, page) => {
     this.setState({ perPage, page });
   }
 
