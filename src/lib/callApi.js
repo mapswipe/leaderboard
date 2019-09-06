@@ -1,6 +1,8 @@
 import firebase from 'firebase';
 import { getLevelForContributionCount } from './Levels';
 
+const logoSalesForce = require('../assets/companies/salesForce.png');
+const logoMapSwipe = require('../assets/companies/mapSwipe.png');
 const config = require('./config');
 
 let localData = [];
@@ -12,11 +14,20 @@ try {
 
 firebase.initializeApp(config);
 const db = firebase.database();
-const companies = ['apple', 'uber', 'slack', 'github', 'lyft', 'twitter', 'amazon', 'google', 'ibm', 'sap'];
+const companies = ['apple', 'uber', 'slack', 'github', 'sf', 'twitter', 'amazon', 'google', 'ibm', 'sap'];
 
-const isInclude = (str, pattern) => str.toLowerCase().includes(pattern.toLowerCase());
+const matchesSearch = (str, pattern, startsWithSearch) => startsWithSearch
+  ? str.toLowerCase().startsWith(pattern.toLowerCase())
+  : str.toLowerCase().includes(pattern.toLowerCase());
 
-const getFormattedData = (snapshot, query = undefined) => {
+const getCompanyLogo = (username) => {
+  switch (username) {
+    case (username.match(/^sf_/i) || {}).input: return logoSalesForce;
+    default: return logoMapSwipe;
+  }
+};
+
+const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
   const data = [];
   let totalContributions = 0;
   let totalDistance = 0;
@@ -31,8 +42,9 @@ const getFormattedData = (snapshot, query = undefined) => {
     }
     const { contributions, distance } = datum;
     const level = getLevelForContributionCount(distance);
-    if (!query || isInclude(username, query)) {
-      data.push({ contributions, distance, username, level });
+    const logo = getCompanyLogo(username);
+    if (!query || matchesSearch(username, query, startsWithSearch)) {
+      data.push({ contributions, distance, username, logo, level });
       totalContributions += contributions;
       totalDistance += distance;
     }
@@ -40,17 +52,17 @@ const getFormattedData = (snapshot, query = undefined) => {
   return { data, totalContributions, totalDistance };
 };
 
-const getDevData = (query = '') => (
+const getDevData = (query = '', startsWithSearch = true) => (
   new Promise((resolve, reject) => {
-    const res = getFormattedData(localData, query);
+    const res = getFormattedData(localData, query, startsWithSearch);
     if (res) resolve(res); else reject(Error('Something goes wrong'));
   })
 );
 
-const getProdData = (query = '') => {
+const getProdData = (query = '', startsWithSearch = true) => {
   const usersRef = db.ref('users');
   return usersRef.once('value')
-    .then(snapshot => getFormattedData(snapshot, query))
+    .then(snapshot => getFormattedData(snapshot, query, startsWithSearch))
     .catch((err) => {
       // eslint-disable-next-line no-console
       console.log('Error getting documents', err);

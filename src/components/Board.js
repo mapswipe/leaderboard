@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { CSVLink } from 'react-csv';
 
 import Table from './Table';
+import SearchBar from './SearchBar';
 import { colors, mobileThresholdsPixels } from './styledComponents';
 import { getUsersPromise } from '../lib/callApi';
 import { formattedNumber, formattedDate } from '../lib/formatting';
@@ -34,24 +35,29 @@ const P = styled.p`
 
 const EmphSpan1 = styled.span`color: ${colors.orange};`;
 const EmphSpan2 = styled.span`color: ${colors.lightOrange}`;
-const FormContainer = styled.div``;
-const Input = styled.input``;
-const SubmitButton = styled.button``;
 const StyledCSVLink = styled(CSVLink)`
   margin-left: 10px;
   color: ${colors.grey};
 `;
 
 const csvHeaders = [
+  { label: 'Username', key: 'username' },
   { label: 'Mapped Area', key: 'distance' },
   { label: 'Contributions', key: 'contributions' },
-  { label: 'Username', key: 'username' },
+  { label: 'Level', key: 'level.grade' },
 ];
 
 class Board extends React.Component {
   constructor() {
     super();
-    this.state = { totalData: [], totalContributions: 0, totalDistance: 0, query: '', isLoading: true };
+    this.state = {
+      totalData: [],
+      totalContributions: 0,
+      totalDistance: 0,
+      query: '',
+      startsWithSearch: true,
+      isLoading: true,
+    };
     getUsersPromise().then(({ data, totalContributions, totalDistance }) => this.setState({
       totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
       totalContributions,
@@ -60,21 +66,26 @@ class Board extends React.Component {
     }));
   }
 
-  handleOnBlur(event) {
+  handleOnBlur = (event) => {
     this.setState({ query: event.target.value });
   }
 
-  handleKeyUp(event) {
+  handleKeyUp = (event) => {
     if (event.keyCode === 13) {
       event.preventDefault();
-      this.setState({ query: event.target.value }, () => { this.runSearch(); });
+      this.setState({ query: event.target.value }, this.runSearch);
     }
   }
 
-  runSearch() {
-    const { query } = this.state;
+  toggleStartsWithSearch = () => {
+    const { startsWithSearch } = this.state;
+    this.setState({ startsWithSearch: !startsWithSearch });
+  }
+
+  runSearch = () => {
+    const { query, startsWithSearch } = this.state;
     this.setState({ totalData: [], isLoading: true });
-    getUsersPromise(query).then(({ data, totalContributions, totalDistance }) => this.setState({
+    getUsersPromise(query, startsWithSearch).then(({ data, totalContributions, totalDistance }) => this.setState({
       totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
       totalContributions,
       totalDistance,
@@ -82,21 +93,24 @@ class Board extends React.Component {
     }));
   }
 
-  sortFunction(accessor, desc = true) {
+  sortFunction = (accessor, desc = true) => {
     const { totalData } = this.state;
     const data = [...totalData.sort((a, b) => basicSort(a, b, accessor, desc))];
     this.setState({ totalData: data });
   }
 
   render() {
-    const { totalData, totalContributions, totalDistance, isLoading } = this.state;
+    const { totalData, totalContributions, totalDistance, isLoading, startsWithSearch } = this.state;
     return (
       <MainContainer>
         <a href="/"><Img src={logo} alt="MapSwipe logo" /></a>
-        <FormContainer>
-          <Input type="text" onBlur={(e) => { this.handleOnBlur(e); }} onKeyUp={(e) => { this.handleKeyUp(e); }} />
-          <SubmitButton onClick={() => { this.runSearch(); }}>Search</SubmitButton>
-        </FormContainer>
+        <SearchBar
+          handleOnBlur={this.handleOnBlur}
+          handleKeyUp={this.handleKeyUp}
+          startsWithSearch={startsWithSearch}
+          toggleStartsWithSearch={this.toggleStartsWithSearch}
+          runSearch={this.runSearch}
+        />
         <P>
           Thanks for mapping &nbsp;
           <EmphSpan1>{formattedNumber(totalContributions)}</EmphSpan1>
@@ -106,7 +120,7 @@ class Board extends React.Component {
         </P>
         <Table
           totalData={totalData}
-          sortFunction={(accessor, desc) => this.sortFunction(accessor, desc)}
+          sortFunction={this.sortFunction}
           isLoading={isLoading}
         />
         <StyledCSVLink
