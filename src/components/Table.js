@@ -113,7 +113,7 @@ class Table extends React.Component {
     super(props);
     const headers = {
       username: { name: 'Username', desc: false },
-      distance: { name: 'Mapped Area', description: 'Sq Km Checked', desc: true },
+      distance: { name: 'Mapped Area', description: 'Sq Km Checked', desc: false },
       contributions: { name: 'Contributions', description: 'Objects Found', desc: false },
     };
     this.state = { page: 1, perPage: 10, headers, activeHeader: 'distance' };

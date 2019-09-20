@@ -43,7 +43,7 @@ const TableHeader = ({ name, desc, isActive, description, updateHeader, notSorta
       {name}
       {description && <NameDescription>{description}</NameDescription>}
     </Name>
-    {!notSortable && <Arrow isUp={!desc} isVisible={isActive}>&#9660;</Arrow>}
+    {!notSortable && <Arrow isUp={!desc} isVisible={isActive}>&#9650;</Arrow>}
   </Container>
 );
 
