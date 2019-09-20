@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { colors } from './styledComponents';
@@ -24,6 +24,7 @@ const NameDescription = styled.p`
   color: ${colors.grey};
   font-size: 11px;
   margin: 3px;
+  text-align: center;
   @media(max-width: 600px) {
     font-size: 7px;
   }
@@ -32,36 +33,26 @@ const NameDescription = styled.p`
 const Arrow = styled.span`
   margin-left: 0.5rem;
   font-size: 12px;
-  transition: transform 0.4s;
   ${({ isUp }) => isUp && 'transform: rotate(-180deg);'}
+  ${({ isVisible }) => !isVisible && 'opacity: 0;'}
 `;
 
-const TableHeader = ({ name, accessor, description, sortFunction, setSortedHeader, notSortable }) => {
-  const [desc, setDesc] = useState(accessor === 'distance');
-
-  function handleClick() {
-    sortFunction(!desc);
-    setDesc(!desc);
-    setSortedHeader(accessor);
-  }
-
-  return (
-    <Container onClick={() => !notSortable && handleClick()} notSortable={notSortable}>
-      <Name>
-        {name}
-        {description && <NameDescription>{description}</NameDescription>}
-      </Name>
-      {!notSortable && <Arrow id={`${accessor}SortArrow`} isUp={!desc} className="sort-arrows">&#9660;</Arrow>}
-    </Container>
-  );
-};
+const TableHeader = ({ name, desc, isActive, description, updateHeader, notSortable }) => (
+  <Container onClick={() => !notSortable && updateHeader()} notSortable={notSortable}>
+    <Name>
+      {name}
+      {description && <NameDescription>{description}</NameDescription>}
+    </Name>
+    {!notSortable && <Arrow isUp={!desc} isVisible={isActive}>&#9660;</Arrow>}
+  </Container>
+);
 
 TableHeader.propTypes = {
   name: PropTypes.string.isRequired,
-  accessor: PropTypes.string,
+  desc: PropTypes.bool,
+  isActive: PropTypes.bool,
   description: PropTypes.string,
-  sortFunction: PropTypes.func,
-  setSortedHeader: PropTypes.func,
+  updateHeader: PropTypes.func,
   notSortable: PropTypes.bool,
 };
 

@@ -54,14 +54,16 @@ class Board extends React.Component {
       totalData: [],
       totalContributions: 0,
       totalDistance: 0,
+      overallDataLength: 0,
       query: '',
       startsWithSearch: true,
       isLoading: true,
     };
-    getUsersPromise().then(({ data, totalContributions, totalDistance }) => this.setState({
+    getUsersPromise().then(({ data, totalContributions, totalDistance, overallDataLength }) => this.setState({
       totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
       totalContributions,
       totalDistance,
+      overallDataLength,
       isLoading: false,
     }));
   }
@@ -85,12 +87,14 @@ class Board extends React.Component {
   runSearch = () => {
     const { query, startsWithSearch } = this.state;
     this.setState({ totalData: [], isLoading: true });
-    getUsersPromise(query, startsWithSearch).then(({ data, totalContributions, totalDistance }) => this.setState({
-      totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
-      totalContributions,
-      totalDistance,
-      isLoading: false,
-    }));
+    getUsersPromise(query, startsWithSearch)
+      .then(({ data, totalContributions, totalDistance, overallDataLength }) => this.setState({
+        totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
+        totalContributions,
+        totalDistance,
+        overallDataLength,
+        isLoading: false,
+      }));
   }
 
   sortFunction = (accessor, desc = true) => {
@@ -100,7 +104,7 @@ class Board extends React.Component {
   }
 
   render() {
-    const { totalData, totalContributions, totalDistance, isLoading, startsWithSearch } = this.state;
+    const { totalData, totalContributions, totalDistance, startsWithSearch, query, ...props } = this.state;
     return (
       <MainContainer>
         <a href="/"><Img src={logo} alt="MapSwipe logo" /></a>
@@ -121,7 +125,8 @@ class Board extends React.Component {
         <Table
           totalData={totalData}
           sortFunction={this.sortFunction}
-          isLoading={isLoading}
+          query={query}
+          {...props}
         />
         <StyledCSVLink
           data={totalData}
