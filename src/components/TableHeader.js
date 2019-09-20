@@ -30,11 +30,15 @@ const NameDescription = styled.p`
   }
 `;
 
+const ArrowContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
 const Arrow = styled.span`
-  margin-left: 0.5rem;
-  font-size: 12px;
-  ${({ isUp }) => isUp && 'transform: rotate(-180deg);'}
-  ${({ isVisible }) => !isVisible && 'opacity: 0;'}
+  margin-left: 0.3rem;
+  font-size: 8px;
+  ${({ isActive }) => !isActive && 'opacity: 0.3'}
 `;
 
 const TableHeader = ({ name, desc, isActive, description, updateHeader, notSortable }) => (
@@ -43,7 +47,12 @@ const TableHeader = ({ name, desc, isActive, description, updateHeader, notSorta
       {name}
       {description && <NameDescription>{description}</NameDescription>}
     </Name>
-    {!notSortable && <Arrow isUp={!desc} isVisible={isActive}>&#9650;</Arrow>}
+    {!notSortable && (
+      <ArrowContainer>
+        <Arrow isActive={desc && isActive}>&#9650;</Arrow>
+        <Arrow isActive={!desc && isActive}>&#9660;</Arrow>
+      </ArrowContainer>
+    )}
   </Container>
 );
 
