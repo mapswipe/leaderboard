@@ -261,14 +261,15 @@ export const Levels = {
 };
 
 export const getLevelForContributionCount = (distance) => {
+  const convertedDistance = distance / 0.0233732728;
   const maxLevel = 36;
   let toReturn = 1;
-  if (distance > Levels[maxLevel].expRequired) toReturn = maxLevel;
+  if (convertedDistance > Levels[maxLevel].expRequired) toReturn = maxLevel;
   else {
     try {
       Object.keys(Levels).forEach((level) => {
-        if (distance > Levels[level].expRequired
-            && distance < Levels[parseInt(level, 10) + 1].expRequired) {
+        if (convertedDistance > Levels[level].expRequired
+            && convertedDistance < Levels[parseInt(level, 10) + 1].expRequired) {
           toReturn = level;
         }
       });
