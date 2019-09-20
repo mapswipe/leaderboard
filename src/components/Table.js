@@ -21,16 +21,6 @@ const StyledDataTable = styled(DataTable)`&&&{
     max-width: 50px;
     padding-left: 12px;
   }
-  .rdt_TableRow .rdt_TableCell:first-child {
-    margin-left: 16px;
-  }
-  .rdt_TableRow .rdt_TableCell:nth-child(2) {
-    margin-left: 32px;
-    @media(max-width: ${mobileThresholdsPixels}) {
-      margin-left: 0px;
-    }
-  }
-  .sort-arrows { opacity: 0; }
   .rdt_TableFooter {
     @media(max-width: ${mobileThresholdsPixels}) {
       flex-wrap: wrap;
@@ -38,11 +28,6 @@ const StyledDataTable = styled(DataTable)`&&&{
       justify-content: flex-start;
     }
   }
-  ${({ activeHeader }) => `
-    #usernameSortArrow { opacity: ${(activeHeader === 'username') ? 1 : 0} }
-    #contributionsSortArrow { opacity: ${(activeHeader === 'contributions') ? 1 : 0} }
-    #distanceSortArrow { opacity: ${(activeHeader === 'distance') ? 1 : 0} }
-  `}
 }`;
 
 const UsernameCell = styled.div`
@@ -66,6 +51,7 @@ const BagdeCell = styled.div`
 const IndexSpan = styled(ColoredSpan)`
   min-width: 42px;
   font-size: 13px;
+  ${({ center }) => center && 'text-align: center;'}
 `;
 
 const ContributionsSpan = styled(ColoredSpan)`margin-left: -20px;`;
@@ -88,6 +74,7 @@ const LevelSpan = styled(ColoredSpan)`
 `;
 
 const styledIndexCell = row => (<IndexSpan color="blue">{`${row.index}.`}</IndexSpan>);
+const styledRankCell = row => (<IndexSpan color="blue" center>{`${formattedNumber(row.rank)}`}</IndexSpan>);
 const styledUsernameCell = row => (
   <UsernameCell>
     <Icon src={row.logo} alt={row.username} />
@@ -112,27 +99,47 @@ const styledContributionsCell = row => (
   <ContributionsSpan color="orange">{formattedNumber(row.contributions)}</ContributionsSpan>
 );
 
+const getRowIndex = (index, page, perPage) => ((page - 1) * perPage) + index + 1;
 const getDataForPage = memoize((totalData, page, perPage) => (
-  { data: totalData.slice((page - 1) * perPage, (page * perPage)), totalRows: totalData.length }
+  {
+    data: totalData.slice((page - 1) * perPage, (page * perPage))
+      .map((datum, index) => ({ ...datum, index: getRowIndex(index, page, perPage) })),
+    totalRows: totalData.length,
+  }
 ));
 
 class Table extends React.Component {
   constructor(props) {
     super(props);
-    const { sortFunction } = props;
-    this.state = { page: 1, perPage: 10, sortedHeader: 'distance' };
-    this.columns = [
-      {
-        name: (<TableHeader name="Rank" notSortable />),
-        cell: styledIndexCell,
-      },
+    const headers = {
+      username: { name: 'Username', desc: false },
+      distance: { name: 'Mapped Area', description: 'Sq Km Checked', desc: true },
+      contributions: { name: 'Contributions', description: 'Objects Found', desc: false },
+    };
+    this.state = { page: 1, perPage: 10, headers, activeHeader: 'distance' };
+  }
+
+  updateHeader = (accessor) => {
+    const { sortFunction } = this.props;
+    const { headers } = this.state;
+    const { desc } = headers[accessor];
+    const updatedHeader = { ...headers[accessor], desc: !desc };
+
+    sortFunction(accessor, desc);
+    this.setState({ headers: { ...headers, [accessor]: updatedHeader }, activeHeader: accessor });
+  }
+
+  getColumns = () => {
+    const { query, overallDataLength } = this.props;
+    const { headers, activeHeader } = this.state;
+    const columns = [
+      { cell: styledIndexCell },
       {
         name: (
           <TableHeader
-            accessor="username"
-            name="Username"
-            sortFunction={desc => sortFunction('username', desc)}
-            setSortedHeader={(name) => { this.setState({ sortedHeader: name }); }}
+            {...headers.username}
+            isActive={activeHeader === 'username'}
+            updateHeader={() => this.updateHeader('username')}
           />
         ),
         selector: 'username',
@@ -141,11 +148,9 @@ class Table extends React.Component {
       {
         name: (
           <TableHeader
-            name="Mapped Area"
-            accessor="distance"
-            description="Sq Km Checked"
-            sortFunction={desc => sortFunction('distance', desc)}
-            setSortedHeader={(name) => { this.setState({ sortedHeader: name }); }}
+            {...headers.distance}
+            isActive={activeHeader === 'distance'}
+            updateHeader={() => this.updateHeader('distance')}
           />
         ),
         selector: 'distance',
@@ -158,17 +163,24 @@ class Table extends React.Component {
       {
         name: (
           <TableHeader
-            name="Contributions"
-            accessor="contributions"
-            description="Objects Found"
-            sortFunction={desc => sortFunction('contributions', desc)}
-            setSortedHeader={(name) => { this.setState({ sortedHeader: name }); }}
+            {...headers.contributions}
+            isActive={activeHeader === 'contributions'}
+            updateHeader={() => this.updateHeader('contributions')}
           />
         ),
         selector: 'contributions',
         cell: styledContributionsCell,
       },
     ];
+    if (query) {
+      columns.push({
+        name: (
+          <TableHeader name="MapSwipe Rank" description={`out of ${formattedNumber(overallDataLength)}`} notSortable />
+        ),
+        cell: styledRankCell,
+      });
+    }
+    return columns;
   }
 
   handlePageChange = (page) => {
@@ -181,13 +193,13 @@ class Table extends React.Component {
 
   /* eslint-disable no-shadow */
   render() {
-    const { loading, page, perPage, sortedHeader } = this.state;
+    const { loading, page, perPage } = this.state;
     const { totalData, isLoading } = this.props;
     const { data, totalRows } = getDataForPage(totalData, page, perPage);
+
     return (
       <StyledDataTable
-        activeHeader={sortedHeader}
-        columns={this.columns}
+        columns={this.getColumns()}
         data={data}
         progressPending={loading}
         pagination
@@ -210,6 +222,8 @@ Table.propTypes = {
   })).isRequired,
   sortFunction: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  query: PropTypes.string,
+  overallDataLength: PropTypes.number,
 };
 
 export default Table;

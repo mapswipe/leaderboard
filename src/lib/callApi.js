@@ -32,6 +32,7 @@ const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
   const data = [];
   let totalContributions = 0;
   let totalDistance = 0;
+  const overallDataLength = snapshot.length;
   snapshot.forEach((datum, index) => {
     let { username } = datum;
     if (process.env.REACT_APP_SOURCE === 'dev') {
@@ -41,12 +42,12 @@ const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
     const level = getLevelForContributionCount(distance);
     const logo = getCompanyLogo(username);
     if (!query || matchesSearch(username, query, startsWithSearch)) {
-      data.push({ contributions, distance, username, logo, level, index: index + 1 });
+      data.push({ contributions, distance, username, logo, level, rank: index + 1 });
       totalContributions += contributions;
       totalDistance += distance;
     }
   });
-  return { data, totalContributions, totalDistance };
+  return { data, totalContributions, totalDistance, overallDataLength };
 };
 
 const getDevData = (query = '', startsWithSearch = true) => (
