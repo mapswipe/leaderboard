@@ -21,6 +21,15 @@ const StyledDataTable = styled(DataTable)`&&&{
     max-width: 50px;
     padding-left: 12px;
   }
+  .rdt_TableRow .rdt_TableCell:first-child {
+    margin-left: 16px;
+  }
+  .rdt_TableRow .rdt_TableCell:nth-child(2) {
+    margin-left: 32px;
+    @media(max-width: ${mobileThresholdsPixels}) {
+      margin-left: 0px;
+    }
+  }
   .sort-arrows { opacity: 0; }
   .rdt_TableFooter {
     @media(max-width: ${mobileThresholdsPixels}) {
@@ -103,14 +112,8 @@ const styledContributionsCell = row => (
   <ContributionsSpan color="orange">{formattedNumber(row.contributions)}</ContributionsSpan>
 );
 
-
-const getRowIndex = (index, page, perPage) => ((page - 1) * perPage) + index + 1;
 const getDataForPage = memoize((totalData, page, perPage) => (
-  {
-    data: totalData.slice((page - 1) * perPage, (page * perPage))
-      .map((datum, index) => ({ ...datum, index: getRowIndex(index, page, perPage) })),
-    totalRows: totalData.length,
-  }
+  { data: totalData.slice((page - 1) * perPage, (page * perPage)), totalRows: totalData.length }
 ));
 
 class Table extends React.Component {
@@ -119,7 +122,10 @@ class Table extends React.Component {
     const { sortFunction } = props;
     this.state = { page: 1, perPage: 10, sortedHeader: 'distance' };
     this.columns = [
-      { cell: styledIndexCell },
+      {
+        name: (<TableHeader name="Rank" notSortable />),
+        cell: styledIndexCell,
+      },
       {
         name: (
           <TableHeader

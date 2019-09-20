@@ -1,5 +1,6 @@
 import firebase from 'firebase';
 import { getLevelForContributionCount } from './Levels';
+import { basicSort } from './sortFunctions';
 
 const logoSalesForce = require('../assets/companies/salesForce.png');
 const logoMapSwipe = require('../assets/companies/mapSwipe.png');
@@ -31,20 +32,16 @@ const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
   const data = [];
   let totalContributions = 0;
   let totalDistance = 0;
-
   snapshot.forEach((datum, index) => {
-    let username = '';
+    let { username } = datum;
     if (process.env.REACT_APP_SOURCE === 'dev') {
-      username = `${companies[Math.floor(index % companies.length)]}_${datum.username}`;
-    } else {
-      datum = datum.val();
-      username = datum.username.trim();
+      username = `${companies[Math.floor(index % companies.length)]}_${datum.username.trim()}`;
     }
     const { contributions, distance } = datum;
     const level = getLevelForContributionCount(distance);
     const logo = getCompanyLogo(username);
     if (!query || matchesSearch(username, query, startsWithSearch)) {
-      data.push({ contributions, distance, username, logo, level });
+      data.push({ contributions, distance, username, logo, level, index: index + 1 });
       totalContributions += contributions;
       totalDistance += distance;
     }
@@ -54,15 +51,26 @@ const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
 
 const getDevData = (query = '', startsWithSearch = true) => (
   new Promise((resolve, reject) => {
-    const res = getFormattedData(localData, query, startsWithSearch);
+    const res = getFormattedData(localData.sort((a, b) => basicSort(a, b, 'distance')), query, startsWithSearch);
     if (res) resolve(res); else reject(Error('Something goes wrong'));
   })
 );
 
+const snapshotToArray = (snapshot) => {
+  const returnArr = [];
+  snapshot.forEach((childSnapshot) => {
+    let val = childSnapshot.val();
+    val = { ...val, username: val.username.trim() };
+    returnArr.push(val);
+  });
+  returnArr.sort((a, b) => basicSort(a, b, 'distance'));
+  return returnArr;
+};
+
 const getProdData = (query = '', startsWithSearch = true) => {
   const usersRef = db.ref('users');
   return usersRef.once('value')
-    .then(snapshot => getFormattedData(snapshot, query, startsWithSearch))
+    .then(snapshot => getFormattedData(snapshotToArray(snapshot), query, startsWithSearch))
     .catch((err) => {
       // eslint-disable-next-line no-console
       console.log('Error getting documents', err);
