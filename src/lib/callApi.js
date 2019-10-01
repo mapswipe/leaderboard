@@ -1,10 +1,11 @@
 import firebase from 'firebase';
 import { getLevelForContributionCount } from './Levels';
 import { basicSort } from './sortFunctions';
+import { testUsers } from './utils';
+import config from './config';
 
 const logoSalesForce = require('../assets/companies/salesForce.png');
 const logoMapSwipe = require('../assets/companies/mapSwipe.png');
-const config = require('./config');
 
 let localData = [];
 try {
@@ -61,8 +62,9 @@ const snapshotToArray = (snapshot) => {
   const returnArr = [];
   snapshot.forEach((childSnapshot) => {
     let val = childSnapshot.val();
-    val = { ...val, username: val.username.trim() };
-    returnArr.push(val);
+    const username = val.username.trim();
+    val = { ...val, username };
+    if (!testUsers.includes(username)) returnArr.push(val);
   });
   returnArr.sort((a, b) => basicSort(a, b, 'distance'));
   return returnArr;
