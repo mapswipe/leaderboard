@@ -9,7 +9,7 @@ const logoMapSwipe = require('../assets/companies/mapSwipe.png');
 let localData = [];
 try {
   // eslint-disable-next-line global-require
-  localData = require('./msf-mapswipe-users-export.json').data;
+  localData = require('./json/msf-mapswipe-users-export.json').data;
   // eslint-disable-next-line no-console
 } catch (e) { console.error(e); }
 
@@ -33,6 +33,7 @@ const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
   let totalContributions = 0;
   let totalDistance = 0;
   const overallDataLength = snapshot.length;
+
   snapshot.forEach((datum, index) => {
     let { username } = datum;
     if (process.env.REACT_APP_SOURCE === 'dev') {
@@ -47,6 +48,7 @@ const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
       totalDistance += distance;
     }
   });
+
   return { data, totalContributions, totalDistance, overallDataLength };
 };
 
