@@ -1,11 +1,15 @@
 {
   "projects": {
-    "default": "msf-mapswipe"
+    "default": "mapswipe-leaderboard",
+    "staging": "msf-mapswipe"
   },
   "targets": {
     "msf-mapswipe": {
       "hosting": {
-        "leaderboard": [
+        "staging-target": [
+          "msf-mapswipe"
+        ],
+        "prod-target": [
           "mapswipe-leaderboard"
         ]
       }
