@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 import { CSVLink } from 'react-csv';
 
 import Table from './Table';
@@ -9,6 +10,7 @@ import { getUsersPromise } from '../lib/callApi';
 import { formattedNumber, formattedDate } from '../lib/formatting';
 import { basicSort } from '../lib/sortFunctions';
 import logo from '../assets/logo.mapSwipe.banner.png';
+import logoV1 from '../assets/logo.mapSwipe.banner.v1.png';
 
 const MainContainer = styled.div`
   padding: 48px 15vw;
@@ -105,9 +107,11 @@ class Board extends React.Component {
 
   render() {
     const { totalData, totalContributions, totalDistance, startsWithSearch, query, ...props } = this.state;
+    const { isV1 } = this.props;
+
     return (
       <MainContainer>
-        <a href="/"><Img src={logo} alt="MapSwipe logo" /></a>
+        <a href="/"><Img src={isV1 ? logoV1 : logo} alt="MapSwipe logo" /></a>
         <SearchBar
           handleOnBlur={this.handleOnBlur}
           handleKeyUp={this.handleKeyUp}
@@ -139,5 +143,9 @@ class Board extends React.Component {
     );
   }
 }
+
+Board.propTypes = {
+  isV1: PropTypes.bool,
+};
 
 export default Board;

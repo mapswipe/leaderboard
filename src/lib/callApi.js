@@ -1,15 +1,20 @@
 import firebase from 'firebase';
+
 import { getLevelForContributionCount } from './Levels';
 import { basicSort } from './sortFunctions';
 import config from './config';
-
-const logoSalesForce = require('../assets/companies/salesForce.png');
-const logoMapSwipe = require('../assets/companies/mapSwipe.png');
+import { isV1, DISTANCE_TO_TACK } from '../constants';
+import logoSalesForce from '../assets/companies/salesForce.png';
+import logoMapSwipe from '../assets/companies/mapSwipe.png';
 
 let localData = [];
 try {
-  // eslint-disable-next-line global-require
-  localData = require('./json/msf-mapswipe-users-export.json').data;
+  /* eslint-disable global-require */
+  if (isV1) {
+    localData = require('./json/msf-mapswipe-users-export-v1.json').data;
+  } else {
+    localData = require('./json/msf-mapswipe-users-export.json');
+  }
   // eslint-disable-next-line no-console
 } catch (e) { console.error(e); }
 
@@ -28,6 +33,20 @@ const getCompanyLogo = (username) => {
   }
 };
 
+const getContributionsMetric = (contributions) => {
+  let metric = 0;
+
+  if (!contributions) {
+    return 0;
+  }
+
+  Object.keys(contributions).forEach((key) => {
+    metric += Object.keys(contributions[key]).length;
+  });
+
+  return metric;
+};
+
 const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
   const data = [];
   let totalContributions = 0;
@@ -36,12 +55,19 @@ const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
 
   snapshot.forEach((datum, index) => {
     let { username } = datum;
+
     if (process.env.REACT_APP_SOURCE === 'dev') {
       username = `${companies[Math.floor(index % companies.length)]}_${datum.username.trim()}`;
     }
-    const { contributions, distance } = datum;
-    const level = getLevelForContributionCount(distance);
+
+    const { taskContributionCount = 0 } = datum;
+    let { contributions, distance } = datum;
+    contributions = isV1 ? contributions : getContributionsMetric(contributions);
+    distance = isV1 ? distance : Math.floor(taskContributionCount * DISTANCE_TO_TACK);
+
+    const level = getLevelForContributionCount(isV1 ? distance / DISTANCE_TO_TACK : taskContributionCount);
     const logo = getCompanyLogo(username);
+
     if (!query || matchesSearch(username, query, startsWithSearch)) {
       data.push({ contributions, distance, username, logo, level, rank: index + 1 });
       totalContributions += contributions;
@@ -64,7 +90,7 @@ const snapshotToArray = (snapshot) => {
   const returnArr = [];
   snapshot.forEach((childSnapshot) => {
     let val = childSnapshot.val();
-    const username = val.username.trim();
+    const username = val.username ? val.username.trim() : '';
     val = { ...val, username };
     if (!invalidUsers.includes(username)) returnArr.push(val);
   });
@@ -73,7 +99,9 @@ const snapshotToArray = (snapshot) => {
 };
 
 const getProdData = (query = '', startsWithSearch = true) => {
-  const usersRef = db.ref('users');
+  const dataRef = isV1 ? 'users' : 'v2/users';
+  const usersRef = db.ref(dataRef);
+
   return usersRef.once('value')
     .then(snapshot => getFormattedData(snapshotToArray(snapshot), query, startsWithSearch))
     .catch((err) => {

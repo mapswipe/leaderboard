@@ -260,16 +260,15 @@ export const Levels = {
   },
 };
 
-export const getLevelForContributionCount = (distance) => {
-  const convertedDistance = distance / 0.0233732728;
+export const getLevelForContributionCount = (taskContributionCount) => {
   const maxLevel = 36;
   let toReturn = 1;
-  if (convertedDistance > Levels[maxLevel].expRequired) toReturn = maxLevel;
+  if (taskContributionCount > Levels[maxLevel].expRequired) toReturn = maxLevel;
   else {
     try {
       Object.keys(Levels).forEach((level) => {
-        if (convertedDistance > Levels[level].expRequired
-            && convertedDistance < Levels[parseInt(level, 10) + 1].expRequired) {
+        if (taskContributionCount > Levels[level].expRequired
+            && taskContributionCount < Levels[parseInt(level, 10) + 1].expRequired) {
           toReturn = level;
         }
       });
@@ -277,7 +276,7 @@ export const getLevelForContributionCount = (distance) => {
       else if (toReturn < 1) toReturn = 1;
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.log(err);
+      console.error(err);
     }
   }
   return Levels[parseInt(toReturn, 10)];
