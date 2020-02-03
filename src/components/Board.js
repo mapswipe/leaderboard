@@ -1,4 +1,5 @@
 import React from 'react';
+import { reverse, sortBy } from 'lodash';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { CSVLink } from 'react-csv';
@@ -8,7 +9,6 @@ import SearchBar from './SearchBar';
 import { colors, mobileThresholdsPixels } from './styledComponents';
 import { getUsersPromise } from '../lib/callApi';
 import { formattedNumber, formattedDate } from '../lib/formatting';
-import { basicSort } from '../lib/sortFunctions';
 import logo from '../assets/logo.mapSwipe.banner.png';
 import logoV1 from '../assets/logo.mapSwipe.banner.v1.png';
 
@@ -62,7 +62,7 @@ class Board extends React.Component {
       isLoading: true,
     };
     getUsersPromise().then(({ data, totalContributions, totalDistance, overallDataLength }) => this.setState({
-      totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
+      totalData: reverse(sortBy(data, 'distance')),
       totalContributions,
       totalDistance,
       overallDataLength,
@@ -91,7 +91,7 @@ class Board extends React.Component {
     this.setState({ totalData: [], isLoading: true });
     getUsersPromise(query, startsWithSearch)
       .then(({ data, totalContributions, totalDistance, overallDataLength }) => this.setState({
-        totalData: data.sort((a, b) => basicSort(a, b, 'distance')),
+        totalData: reverse(sortBy(data, 'distance')),
         totalContributions,
         totalDistance,
         overallDataLength,
@@ -101,8 +101,8 @@ class Board extends React.Component {
 
   sortFunction = (accessor, desc = true) => {
     const { totalData } = this.state;
-    const data = [...totalData.sort((a, b) => basicSort(a, b, accessor, desc))];
-    this.setState({ totalData: data });
+    const data = sortBy(totalData, accessor);
+    this.setState({ totalData: desc ? reverse(data) : data });
   }
 
   render() {

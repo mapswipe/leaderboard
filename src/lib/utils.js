@@ -1,4 +1,5 @@
-import { basicSort } from './sortFunctions';
+import { reverse, sortBy } from 'lodash';
+
 import { invalidUsers, isV1 } from '../constants';
 import logoSalesForce from '../assets/companies/salesForce.png';
 import logoMapSwipe from '../assets/companies/mapSwipe.png';
@@ -39,8 +40,7 @@ export const snapshotToArray = (snapshot) => {
     if (!invalidUsers.includes(username)) returnArr.push(val);
   });
 
-  returnArr.sort((a, b) => basicSort(a, b, 'distance'));
-  return returnArr;
+  return reverse(sortBy(returnArr, 'distance'));
 };
 
 /**

@@ -1,9 +1,8 @@
 import firebase from 'firebase';
-import { reduce, size } from 'lodash';
+import { reduce, size, sortBy, reverse } from 'lodash';
 
 import { matchesSearch, getCompanyLogo, snapshotToArray, getLocalData } from './utils';
 import { getLevelForContributionCount } from './Levels';
-import { basicSort } from './sortFunctions';
 import config from './config';
 import { isV1, DISTANCE_TO_TACK } from '../constants';
 
@@ -50,7 +49,7 @@ const getDevData = (query = '', startsWithSearch = true) => (
   new Promise((resolve, reject) => {
     const localData = getLocalData();
     const res = getFormattedData(
-      localData.sort((a, b) => basicSort(a, b, 'distance')),
+      reverse(sortBy(localData, 'distance')),
       query,
       startsWithSearch,
     );
