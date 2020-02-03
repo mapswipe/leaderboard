@@ -9,6 +9,7 @@ import SearchBar from './SearchBar';
 import { colors, mobileThresholdsPixels } from './styledComponents';
 import { getUsersPromise } from '../lib/callApi';
 import { formattedNumber, formattedDate } from '../lib/formatting';
+import { defaultAccessor } from '../constants';
 import logo from '../assets/logo.mapSwipe.banner.png';
 import logoV1 from '../assets/logo.mapSwipe.banner.v1.png';
 
@@ -42,29 +43,37 @@ const StyledCSVLink = styled(CSVLink)`
   color: ${colors.grey};
 `;
 
-const csvHeaders = [
+const getCSVHeaders = isV1 => ([
   { label: 'Username', key: 'username' },
-  { label: 'Mapped Area', key: 'distance' },
-  { label: 'Contributions', key: 'contributions' },
   { label: 'Level', key: 'level.grade' },
-];
+  ...(isV1
+    ? ([
+      { label: 'Contributions', key: 'contributions' },
+      { label: 'Mapped Area', key: 'distance' },
+    ])
+    : ([
+      { label: 'Task Contribution Count', key: 'taskContributionCount' },
+      { label: 'Project Contribution Count', key: 'projectContributionCount' },
+      { label: 'Group Contribution Count', key: 'groupContributionCount' },
+    ])
+  ),
+]);
+
 
 class Board extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       totalData: [],
-      totalContributions: 0,
-      totalDistance: 0,
+      totalCount: {},
       overallDataLength: 0,
       query: '',
       startsWithSearch: true,
       isLoading: true,
     };
-    getUsersPromise().then(({ data, totalContributions, totalDistance, overallDataLength }) => this.setState({
-      totalData: reverse(sortBy(data, 'distance')),
-      totalContributions,
-      totalDistance,
+    getUsersPromise().then(({ data, totalCount, overallDataLength }) => this.setState({
+      totalData: reverse(sortBy(data, defaultAccessor)),
+      totalCount,
       overallDataLength,
       isLoading: false,
     }));
@@ -90,10 +99,9 @@ class Board extends React.Component {
     const { query, startsWithSearch } = this.state;
     this.setState({ totalData: [], isLoading: true });
     getUsersPromise(query, startsWithSearch)
-      .then(({ data, totalContributions, totalDistance, overallDataLength }) => this.setState({
-        totalData: reverse(sortBy(data, 'distance')),
-        totalContributions,
-        totalDistance,
+      .then(({ data, totalCount, overallDataLength }) => this.setState({
+        totalData: reverse(sortBy(data, defaultAccessor)),
+        totalCount,
         overallDataLength,
         isLoading: false,
       }));
@@ -106,7 +114,7 @@ class Board extends React.Component {
   }
 
   render() {
-    const { totalData, totalContributions, totalDistance, startsWithSearch, query, ...props } = this.state;
+    const { totalData, totalCount, startsWithSearch, query, ...props } = this.state;
     const { isV1 } = this.props;
 
     return (
@@ -119,22 +127,37 @@ class Board extends React.Component {
           toggleStartsWithSearch={this.toggleStartsWithSearch}
           runSearch={this.runSearch}
         />
-        <P>
-          Thanks for mapping &nbsp;
-          <EmphSpan1>{formattedNumber(totalContributions)}</EmphSpan1>
-          &nbsp; square kms and finding &nbsp;
-          <EmphSpan2>{formattedNumber(totalDistance)}</EmphSpan2>
-          &nbsp; objects!
-        </P>
+        {isV1 ? (
+          <P>
+            Thanks for mapping &nbsp;
+            <EmphSpan1>{formattedNumber(totalCount.contributions)}</EmphSpan1>
+            &nbsp; square kms and finding &nbsp;
+            <EmphSpan2>{formattedNumber(totalCount.distance)}</EmphSpan2>
+            &nbsp; objects!
+          </P>
+        ) : (
+          <P>
+            Thanks for contributing to &nbsp;
+            <EmphSpan1>{formattedNumber(totalCount.taskContributionCount)}</EmphSpan1>
+            &nbsp; tasks over &nbsp;
+            <EmphSpan2>{formattedNumber(totalCount.projectContributionCount)}</EmphSpan2>
+            &nbsp; projects and &nbsp;
+            <EmphSpan2>{formattedNumber(totalCount.groupContributionCount)}</EmphSpan2>
+            &nbsp; groups!
+          </P>
+        )}
+
         <Table
           totalData={totalData}
           sortFunction={this.sortFunction}
           query={query}
+          isV1={isV1}
+          defaultAccessor={defaultAccessor}
           {...props}
         />
         <StyledCSVLink
           data={totalData}
-          headers={csvHeaders}
+          headers={getCSVHeaders(isV1)}
           filename={`users_leaderboard_${formattedDate(new Date())}.csv`}
         >
           Export CSV

@@ -1,6 +1,6 @@
 import { reverse, sortBy } from 'lodash';
 
-import { invalidUsers, isV1 } from '../constants';
+import { invalidUsers, isV1, defaultAccessor } from '../constants';
 import logoSalesForce from '../assets/companies/salesForce.png';
 import logoMapSwipe from '../assets/companies/mapSwipe.png';
 
@@ -40,7 +40,7 @@ export const snapshotToArray = (snapshot) => {
     if (!invalidUsers.includes(username)) returnArr.push(val);
   });
 
-  return reverse(sortBy(returnArr, 'distance'));
+  return reverse(sortBy(returnArr, defaultAccessor));
 };
 
 /**
@@ -58,5 +58,5 @@ export const getLocalData = () => {
     // eslint-disable-next-line no-console
   } catch (e) { console.error(e); }
 
-  return localData;
+  return localData.filter(({ username }) => username);
 };

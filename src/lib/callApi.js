@@ -1,20 +1,13 @@
 import firebase from 'firebase';
-import { reduce, size, sortBy, reverse } from 'lodash';
+import { sortBy, reverse } from 'lodash';
 
 import { matchesSearch, getCompanyLogo, snapshotToArray, getLocalData } from './utils';
 import { getLevelForContributionCount } from './Levels';
 import config from './config';
-import { isV1, DISTANCE_TO_TACK } from '../constants';
+import { isV1, defaultAccessor, DISTANCE_TO_TACK } from '../constants';
 
 firebase.initializeApp(config);
 const db = firebase.database();
-
-// Convert a users contributions to a number (on the v2 records)
-const formatV2Contribution = contributions => reduce(
-  contributions,
-  (acc, val) => acc + size(val),
-  0,
-);
 
 /**
  * Prepare both data (real and local) for the Board component
@@ -22,34 +15,58 @@ const formatV2Contribution = contributions => reduce(
 const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
   const data = [];
   const overallDataLength = snapshot.length;
-  let totalContributions = 0;
-  let totalDistance = 0;
+  const totalCount = isV1
+    ? { contributions: 0, distance: 0 }
+    : {
+      projectContributionCount: 0,
+      groupContributionCount: 0,
+      taskContributionCount: 0,
+    };
 
   snapshot.forEach((datum, index) => {
-    const { username, taskContributionCount = 0 } = datum;
-    let { contributions, distance } = datum;
+    const {
+      // v2 fields
+      username,
+      contributions = 0,
+      distance = 0,
+      // v2 fields
+      taskContributionCount = 0,
+      projectContributionCount = 0,
+      groupContributionCount = 0,
+    } = datum;
 
-    contributions = isV1 ? contributions : formatV2Contribution(contributions);
-    distance = isV1 ? distance : Math.floor(taskContributionCount * DISTANCE_TO_TACK);
-
-    const level = getLevelForContributionCount(isV1 ? distance / DISTANCE_TO_TACK : taskContributionCount);
+    const taskContribution = isV1 ? distance / DISTANCE_TO_TACK : taskContributionCount;
+    const level = getLevelForContributionCount(taskContribution);
     const logo = getCompanyLogo(username);
 
     if (!query || matchesSearch(username, query, startsWithSearch)) {
-      data.push({ contributions, distance, username, logo, level, rank: index + 1 });
-      totalContributions += contributions;
-      totalDistance += distance;
+      const additionalData = isV1
+        ? { contributions, distance }
+        : {
+          taskContributionCount,
+          projectContributionCount,
+          groupContributionCount,
+        };
+
+      data.push({ ...additionalData, username, logo, level, rank: index + 1 });
+      // v1 totalCount
+      totalCount.contributions += contributions;
+      totalCount.distance += distance;
+      // v2 totalCount
+      totalCount.taskContributionCount += taskContributionCount;
+      totalCount.projectContributionCount += projectContributionCount;
+      totalCount.groupContributionCount += groupContributionCount;
     }
   });
 
-  return { data, totalContributions, totalDistance, overallDataLength };
+  return { data, totalCount, overallDataLength };
 };
 
 const getDevData = (query = '', startsWithSearch = true) => (
   new Promise((resolve, reject) => {
     const localData = getLocalData();
     const res = getFormattedData(
-      reverse(sortBy(localData, 'distance')),
+      reverse(sortBy(localData, defaultAccessor)),
       query,
       startsWithSearch,
     );
