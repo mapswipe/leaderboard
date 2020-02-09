@@ -14,7 +14,8 @@ const Container = styled.div`
 
 const Name = styled.div`
   color: ${colors.darkGrey};
-  font-size: 14px;
+  font-size: 13px;
+  text-align: center;
   @media(max-width: 600px) {
     font-size: 11px;
   }

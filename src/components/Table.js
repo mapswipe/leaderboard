@@ -51,10 +51,10 @@ class Table extends React.Component {
           level: { name: 'Level', noSelector: true, notSortable: true },
           contributions: { name: 'Contributions', description: 'Objects Found', desc: false },
         } : {
-          taskContributionCount: { name: 'Tasks Count', desc: false },
-          projectContributionCount: { name: 'Project Contribution', desc: false },
+          taskContributionCount: { name: 'Number of Images You\'ve Viewed', desc: false },
+          projectContributionCount: { name: 'Number of Projects Contributed To', desc: false },
           level: { name: 'Level', noSelector: true, notSortable: true },
-          groupContributionCount: { name: 'Group Contribution', desc: false },
+          groupContributionCount: { name: 'Number of Swiping Sessions Completed', desc: false },
         }
       ),
     };

@@ -1,5 +1,5 @@
 import firebase from 'firebase';
-import { sortBy, reverse } from 'lodash';
+import { sortBy, reverse, keys, union } from 'lodash';
 
 import { matchesSearch, getCompanyLogo, snapshotToArray, getLocalData } from './utils';
 import { getLevelForContributionCount } from './Levels';
@@ -14,6 +14,7 @@ const db = firebase.database();
  */
 const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
   const data = [];
+  let projectKeys = [];
   const overallDataLength = snapshot.length;
   const totalCount = isV1
     ? { contributions: 0, distance: 0 }
@@ -25,8 +26,8 @@ const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
 
   snapshot.forEach((datum, index) => {
     const {
-      // v2 fields
       username,
+      // v1 fields
       contributions = 0,
       distance = 0,
       // v2 fields
@@ -53,8 +54,9 @@ const getFormattedData = (snapshot, query = undefined, startsWithSearch) => {
       totalCount.contributions += contributions;
       totalCount.distance += distance;
       // v2 totalCount
+      projectKeys = union(totalCount.projectKeys, keys(contributions));
       totalCount.taskContributionCount += taskContributionCount;
-      totalCount.projectContributionCount += projectContributionCount;
+      totalCount.projectContributionCount += projectKeys.length;
       totalCount.groupContributionCount += groupContributionCount;
     }
   });
