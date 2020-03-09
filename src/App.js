@@ -7,8 +7,13 @@ const App = () => (
   <BrowserRouter>
     <Switch>
 
-      {/* Home page */}
-      <Route path="/">
+      {/* v1 page */}
+      <Route path="/v1" exact>
+        <Board isV1 />
+      </Route>
+
+      {/* v2 page */}
+      <Route path="/" exact>
         <Board />
       </Route>
 

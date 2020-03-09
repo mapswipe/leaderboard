@@ -26,4 +26,4 @@ yarn-error.log*
 .firebase/
 
 # Local data
-src/lib/msf-mapswipe-users-export.json
+src/lib/json

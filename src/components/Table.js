@@ -1,13 +1,13 @@
 import React from 'react';
+import { map } from 'lodash';
 import memoize from 'memoize-one';
 import PropTypes from 'prop-types';
 import DataTable from 'react-data-table-component';
 import styled from 'styled-components';
 
 import TableHeader from './TableHeader';
-import Tooltip from './Tooltip';
 import LoadingComponent from './LoadingComponent';
-import { ColoredSpan, Icon, mobileThresholdsPixels } from './styledComponents';
+import { getStyledCell, mobileThresholdsPixels } from './styledComponents';
 import { formattedNumber } from '../lib/formatting';
 
 const StyledDataTable = styled(DataTable)`&&&{
@@ -30,75 +30,6 @@ const StyledDataTable = styled(DataTable)`&&&{
   }
 }`;
 
-const UsernameCell = styled.div`
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding-left: 5%;
-  @media(max-width: ${mobileThresholdsPixels}) {
-    padding-left: 0px;
-  }
-`;
-
-const BagdeCell = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  overflow: visible !important;
-`;
-
-const IndexSpan = styled(ColoredSpan)`
-  min-width: 42px;
-  font-size: 13px;
-  ${({ center }) => center && 'text-align: center;'}
-`;
-
-const ContributionsSpan = styled(ColoredSpan)`margin-left: -20px;`;
-const DistanceSpan = styled(ColoredSpan)`
-  min-width: 75px
-  text-align: center;
-  @media(max-width: ${mobileThresholdsPixels}) {
-    margin-right: 6px;
-    min-width: 60px
-  }
-`;
-
-const LevelSpan = styled(ColoredSpan)`
-  margin-right: -20px;
-  text-align: right;
-  @media(max-width: ${mobileThresholdsPixels}) {
-    margin-right: 6px;
-    min-width: 60px
-  }
-`;
-
-const styledIndexCell = row => (<IndexSpan color="blue">{`${row.index}.`}</IndexSpan>);
-const styledRankCell = row => (<IndexSpan color="blue" center>{`${formattedNumber(row.rank)}`}</IndexSpan>);
-const styledUsernameCell = row => (
-  <UsernameCell>
-    <Icon src={row.logo} alt={row.username} />
-    <ColoredSpan color="blue">{row.username}</ColoredSpan>
-  </UsernameCell>
-);
-
-const styledDistanceCell = row => (<DistanceSpan color="darkGrey">{formattedNumber(row.distance)}</DistanceSpan>);
-
-const styledLevelCell = row => (
-  <BagdeCell>
-    {/* to avoid react-data-table force css injection on the first Children */}
-    <div />
-    <Tooltip text={row.level.title}>
-      <LevelSpan color="darkGrey">{row.level.grade}</LevelSpan>
-    </Tooltip>
-    <Icon src={row.level.badge} alt={row.level.title} />
-  </BagdeCell>
-);
-
-const styledContributionsCell = row => (
-  <ContributionsSpan color="orange">{formattedNumber(row.contributions)}</ContributionsSpan>
-);
-
 const getRowIndex = (index, page, perPage) => ((page - 1) * perPage) + index + 1;
 const getDataForPage = memoize((totalData, page, perPage) => (
   {
@@ -111,12 +42,23 @@ const getDataForPage = memoize((totalData, page, perPage) => (
 class Table extends React.Component {
   constructor(props) {
     super(props);
+    const { isV1, defaultAccessor } = props;
     const headers = {
       username: { name: 'Username', desc: false },
-      distance: { name: 'Mapped Area', description: 'Sq Km Checked', desc: false },
-      contributions: { name: 'Contributions', description: 'Objects Found', desc: false },
+      ...(isV1
+        ? {
+          distance: { name: 'Mapped Area', description: 'Sq Km Checked', desc: false },
+          level: { name: 'Level', noSelector: true, notSortable: true },
+          contributions: { name: 'Contributions', description: 'Objects Found', desc: false },
+        } : {
+          taskContributionCount: { name: 'Number of Images You\'ve Viewed', desc: false },
+          projectContributionCount: { name: 'Number of Projects Contributed To', desc: false },
+          level: { name: 'Level', noSelector: true, notSortable: true },
+          groupContributionCount: { name: 'Number of Swiping Sessions Completed', desc: false },
+        }
+      ),
     };
-    this.state = { page: 1, perPage: 10, headers, activeHeader: 'distance' };
+    this.state = { page: 1, perPage: 10, headers, activeHeader: defaultAccessor };
   }
 
   updateHeader = (accessor) => {
@@ -132,52 +74,26 @@ class Table extends React.Component {
   getColumns = () => {
     const { query, overallDataLength } = this.props;
     const { headers, activeHeader } = this.state;
-    const columns = [
-      { cell: styledIndexCell },
-      {
+    const columns = [{ cell: getStyledCell('index') }].concat(
+      map(headers, ({ noSelector, ...value }, key) => ({
         name: (
           <TableHeader
-            {...headers.username}
-            isActive={activeHeader === 'username'}
-            updateHeader={() => this.updateHeader('username')}
+            {...value}
+            isActive={activeHeader === key}
+            updateHeader={() => this.updateHeader(key)}
           />
         ),
-        selector: 'username',
-        cell: styledUsernameCell,
-      },
-      {
-        name: (
-          <TableHeader
-            {...headers.distance}
-            isActive={activeHeader === 'distance'}
-            updateHeader={() => this.updateHeader('distance')}
-          />
-        ),
-        selector: 'distance',
-        cell: styledDistanceCell,
-      },
-      {
-        name: (<TableHeader name="Level" notSortable />),
-        cell: styledLevelCell,
-      },
-      {
-        name: (
-          <TableHeader
-            {...headers.contributions}
-            isActive={activeHeader === 'contributions'}
-            updateHeader={() => this.updateHeader('contributions')}
-          />
-        ),
-        selector: 'contributions',
-        cell: styledContributionsCell,
-      },
-    ];
+        cell: getStyledCell(key),
+        ...(!noSelector && { selector: key }),
+      })),
+    );
+
     if (query) {
       columns.push({
         name: (
           <TableHeader name="MapSwipe Rank" description={`out of ${formattedNumber(overallDataLength)}`} notSortable />
         ),
-        cell: styledRankCell,
+        cell: getStyledCell('rank'),
       });
     }
     return columns;
@@ -216,14 +132,21 @@ class Table extends React.Component {
 
 Table.propTypes = {
   totalData: PropTypes.arrayOf(PropTypes.shape({
-    contributions: PropTypes.number.isRequired,
-    distance: PropTypes.number.isRequired,
     username: PropTypes.string.isRequired,
+    // v1 fields
+    contributions: PropTypes.number,
+    distance: PropTypes.number,
+    // v2 fields
+    taskContributionCount: PropTypes.number,
+    projectContributionCount: PropTypes.number,
+    groupContributionCount: PropTypes.number,
   })).isRequired,
   sortFunction: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  isV1: PropTypes.bool,
   query: PropTypes.string,
   overallDataLength: PropTypes.number,
+  defaultAccessor: PropTypes.string.isRequired,
 };
 
 export default Table;
