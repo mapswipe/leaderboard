@@ -137,13 +137,11 @@ class Board extends React.Component {
           </P>
         ) : (
           <P>
-            Thanks for contributing to &nbsp;
+            MapSwipe users have viewed &nbsp;
             <EmphSpan1>{formattedNumber(totalCount.taskContributionCount)}</EmphSpan1>
-            &nbsp; tasks over &nbsp;
+            &nbsp; images across &nbsp;
             <EmphSpan2>{formattedNumber(totalCount.projectContributionCount)}</EmphSpan2>
-            &nbsp; projects and &nbsp;
-            <EmphSpan2>{formattedNumber(totalCount.groupContributionCount)}</EmphSpan2>
-            &nbsp; groups!
+            &nbsp; projects!
           </P>
         )}
 
