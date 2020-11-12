@@ -141,7 +141,7 @@ class Board extends React.Component {
             <EmphSpan1>{formattedNumber(totalCount.taskContributionCount)}</EmphSpan1>
             &nbsp; images across &nbsp;
             <EmphSpan2>{formattedNumber(totalCount.projectContributionCount)}</EmphSpan2>
-            &nbsp; projects!
+            &nbsp; swiping sessions!
           </P>
         )}
 
