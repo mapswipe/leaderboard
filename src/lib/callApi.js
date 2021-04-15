@@ -83,7 +83,9 @@ const getDevData = (query = '', startsWithSearch = true) => (
 
 const getProdData = (query = '', startsWithSearch = true) => {
   const dataRef = isV1 ? 'users' : 'v2/users';
-  const usersRef = db.ref(dataRef).orderByChild("lastAppUse").limitToLast(100);
+  const startTimestamp = new Date();
+  startTimestamp.setDate(startTimestamp.getDate() - 1);
+  const usersRef = db.ref(dataRef).orderByChild("lastAppUse").startAt(startTimestamp.toISOString());
 
   return usersRef.once('value')
     .then(snapshot => getFormattedData(snapshotToArray(snapshot), query, startsWithSearch))
