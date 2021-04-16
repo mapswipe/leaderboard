@@ -137,11 +137,9 @@ class Board extends React.Component {
           </P>
         ) : (
           <P>
-            MapSwipe users have viewed &nbsp;
-            <EmphSpan1>{formattedNumber(totalCount.taskContributionCount)}</EmphSpan1>
-            &nbsp; images across &nbsp;
+            This leaderboard shows users that have used the app in the past 24 hours. In the past 24 hours MapSwipe users have worked on &nbsp;
             <EmphSpan2>{formattedNumber(totalCount.projectContributionCount)}</EmphSpan2>
-            &nbsp; projects!
+            &nbsp; mapping sessions!
           </P>
         )}
 

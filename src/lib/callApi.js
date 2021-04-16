@@ -83,7 +83,13 @@ const getDevData = (query = '', startsWithSearch = true) => (
 
 const getProdData = (query = '', startsWithSearch = true) => {
   const dataRef = isV1 ? 'users' : 'v2/users';
-  const usersRef = db.ref(dataRef);
+  // Only download users from Firebase that have used the app
+  // in the last 24 hours. Downloading all users would result in
+  // too much data transfered from Firebase and
+  // thus would be too costly.
+  const startTimestamp = new Date();
+  startTimestamp.setDate(startTimestamp.getDate() - 1);
+  const usersRef = db.ref(dataRef).orderByChild("lastAppUse").startAt(startTimestamp.toISOString());
 
   return usersRef.once('value')
     .then(snapshot => getFormattedData(snapshotToArray(snapshot), query, startsWithSearch))
